@@ -51,6 +51,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.project.ui.theme.ProjectTheme
 import com.example.project.ui.theme.pixelOperator
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 
 
 // GLOBAL SCOPE
@@ -73,13 +77,55 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjectTheme {
-                Dpad()
-                Hotbar()
+                Game()
 
             }
         }
     }
 }
+
+// The main function keeping track of the game state and the current screen
+@Composable
+fun Game() {
+
+
+    // INIT
+    val configuration = LocalConfiguration.current
+    val gameManager: GameManager = GameManager(GameState.PREPARE, configuration)
+    val DIALOGUE_DELAY = 85L
+    val context = LocalContext.current
+
+
+    var dialogue_visible by remember { mutableStateOf(true) }
+
+
+
+
+
+    // DIALOGUE
+    if(dialogue_visible) {
+        // reading the text
+        var current_dialogue = read_random(context, "enemy.txt")
+        println(current_dialogue)
+
+        // calc how long the text is visible on the screen
+        LaunchedEffect(current_dialogue) {
+            delay(DIALOGUE_DELAY * current_dialogue.length + 1000L)
+            dialogue_visible = false
+        }
+
+
+        // printing the text character by character
+        dialogue(gameManager, current_dialogue, DIALOGUE_DELAY)
+
+    }
+
+
+
+
+}
+
+
 
 @Composable
 fun Hotbar() {
@@ -357,10 +403,14 @@ fun Action(action: String, visible: Boolean) {
 
 }
 
+
+
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ProjectTheme {
-     Dpad()
+
     }
 }
+
